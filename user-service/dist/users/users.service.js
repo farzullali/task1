@@ -38,6 +38,11 @@ let UsersService = class UsersService {
     async findByEmail(email) {
         return this.usersRepository.findOne({ where: { email } });
     }
+    async update(id, updateData) {
+        const user = await this.findOne(id);
+        Object.assign(user, updateData);
+        return this.usersRepository.save(user);
+    }
     async remove(id) {
         const result = await this.usersRepository.delete(id);
         if (result.affected === 0) {

@@ -5,6 +5,7 @@ export declare class User {
     firstName: string;
     lastName: string;
     isActive: boolean;
+    refreshToken: string;
     createdAt: Date;
     hashPassword(): Promise<void>;
     validatePassword(password: string): Promise<boolean>;

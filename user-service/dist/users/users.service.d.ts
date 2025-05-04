@@ -8,5 +8,6 @@ export declare class UsersService {
     findAll(): Promise<User[]>;
     findOne(id: string): Promise<User>;
     findByEmail(email: string): Promise<User | null>;
+    update(id: string, updateData: Partial<User>): Promise<User>;
     remove(id: string): Promise<void>;
 }

@@ -32,6 +32,16 @@ export class UsersService {
     return this.usersRepository.findOne({ where: { email } });
   }
 
+  async update(id: string, updateData: Partial<User>): Promise<User> {
+    const user = await this.findOne(id);
+    
+    // Apply the updates to the user entity
+    Object.assign(user, updateData);
+    
+    // Save the updated user
+    return this.usersRepository.save(user);
+  }
+
   async remove(id: string): Promise<void> {
     const result = await this.usersRepository.delete(id);
     if (result.affected === 0) {
