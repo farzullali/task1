@@ -35,10 +35,8 @@ export class UsersService {
   async update(id: string, updateData: Partial<User>): Promise<User> {
     const user = await this.findOne(id);
     
-    // Apply the updates to the user entity
     Object.assign(user, updateData);
     
-    // Save the updated user
     return this.usersRepository.save(user);
   }
 

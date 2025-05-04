@@ -9,14 +9,12 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    // First try the standard Passport authentication
     try {
       const canActivate = await super.canActivate(context);
       if (canActivate) {
         return true;
       }
     } catch (error) {
-      // If standard auth fails, try manual token verification
     }
 
     const request = context.switchToHttp().getRequest();
@@ -28,7 +26,6 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
     try {
       const payload = await this.tokensService.verifyAccessToken(token);
-      // Attach user to request
       request.user = payload;
       return true;
     } catch (error) {

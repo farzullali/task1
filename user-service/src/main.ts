@@ -5,14 +5,20 @@ import { CustomValidationPipe } from './common/pipes/validation.pipe';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   
-  // Configure global pipes with custom validation
+  app.enableCors({
+    origin: ['http://localhost:3000', 'http://localhost:3003'], 
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    credentials: true,
+    allowedHeaders: 'Content-Type,Accept,Authorization',
+  });
+  
   app.useGlobalPipes(
     new CustomValidationPipe({
       transform: true,
       whitelist: true,
       forbidNonWhitelisted: true,
       transformOptions: {
-        enableImplicitConversion: true, // Enable implicit conversion for simpler client requests
+        enableImplicitConversion: true, 
       },
     }),
   );

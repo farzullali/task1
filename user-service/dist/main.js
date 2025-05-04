@@ -5,6 +5,12 @@ const app_module_1 = require("./app.module");
 const validation_pipe_1 = require("./common/pipes/validation.pipe");
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
+    app.enableCors({
+        origin: ['http://localhost:3000', 'http://localhost:3003'],
+        methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+        credentials: true,
+        allowedHeaders: 'Content-Type,Accept,Authorization',
+    });
     app.useGlobalPipes(new validation_pipe_1.CustomValidationPipe({
         transform: true,
         whitelist: true,

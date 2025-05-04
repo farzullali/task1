@@ -12,7 +12,11 @@ const typeorm_1 = require("@nestjs/typeorm");
 const config_1 = require("@nestjs/config");
 const auth_module_1 = require("./auth/auth.module");
 const users_module_1 = require("./users/users.module");
+const logger_middleware_1 = require("./common/middleware/logger.middleware");
 let AppModule = class AppModule {
+    configure(consumer) {
+        consumer.apply(logger_middleware_1.LoggerMiddleware).forRoutes('*');
+    }
 };
 exports.AppModule = AppModule;
 exports.AppModule = AppModule = __decorate([
@@ -25,12 +29,12 @@ exports.AppModule = AppModule = __decorate([
                 useFactory: (configService) => ({
                     type: 'postgres',
                     host: configService.get('DB_HOST', 'localhost'),
-                    port: parseInt(configService.get('DB_PORT', '5432')),
+                    port: configService.get('DB_PORT', 5432),
                     username: configService.get('DB_USERNAME', 'postgres'),
                     password: configService.get('DB_PASSWORD', 'postgres'),
                     database: configService.get('DB_DATABASE', 'user_service'),
                     entities: [__dirname + '/**/*.entity{.ts,.js}'],
-                    synchronize: configService.get('NODE_ENV', 'development') !== 'production',
+                    synchronize: configService.get('NODE_ENV') !== 'production',
                 }),
             }),
             users_module_1.UsersModule,

@@ -12,7 +12,12 @@ const config_1 = require("@nestjs/config");
 const orders_module_1 = require("./orders/orders.module");
 const prisma_module_1 = require("./prisma/prisma.module");
 const microservices_1 = require("@nestjs/microservices");
+const app_controller_1 = require("./app.controller");
+const logger_middleware_1 = require("./common/middleware/logger.middleware");
 let AppModule = class AppModule {
+    configure(consumer) {
+        consumer.apply(logger_middleware_1.LoggerMiddleware).forRoutes('*');
+    }
 };
 exports.AppModule = AppModule;
 exports.AppModule = AppModule = __decorate([
@@ -35,6 +40,7 @@ exports.AppModule = AppModule = __decorate([
             prisma_module_1.PrismaModule,
             orders_module_1.OrdersModule,
         ],
+        controllers: [app_controller_1.AppController],
     })
 ], AppModule);
 //# sourceMappingURL=app.module.js.map
