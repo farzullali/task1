@@ -13,6 +13,7 @@ const config_1 = require("@nestjs/config");
 const auth_module_1 = require("./auth/auth.module");
 const users_module_1 = require("./users/users.module");
 const logger_middleware_1 = require("./common/middleware/logger.middleware");
+const microservices_1 = require("@nestjs/microservices");
 let AppModule = class AppModule {
     configure(consumer) {
         consumer.apply(logger_middleware_1.LoggerMiddleware).forRoutes('*');
@@ -37,6 +38,19 @@ exports.AppModule = AppModule = __decorate([
                     synchronize: configService.get('NODE_ENV') !== 'production',
                 }),
             }),
+            microservices_1.ClientsModule.register([
+                {
+                    name: 'ORDER_SERVICE',
+                    transport: microservices_1.Transport.RMQ,
+                    options: {
+                        urls: [process.env.RABBITMQ_URL || 'amqp://guest:guest@localhost:5672'],
+                        queue: 'user_queue',
+                        queueOptions: {
+                            durable: false
+                        },
+                    },
+                },
+            ]),
             users_module_1.UsersModule,
             auth_module_1.AuthModule,
         ],

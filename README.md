@@ -1,205 +1,109 @@
-# Microservices Project: User and Order Services with React Frontend
+# Microservices Event-Based Architecture
 
-This project consists of two separate microservices and a React frontend:
+This project demonstrates a microservices architecture using NestJS and RabbitMQ for event-based communication between services.
 
-1. **User Service** - For user registration and authentication (Port: 3001)
-2. **Order Service** - For order creation and listing (Port: 3002)
-3. **Frontend** - React application with authentication and order management (Port: 3000)
+## Architecture Overview
 
-## Features
+The system consists of two main microservices:
 
-### User Service
-- User registration
-- Login with JWT
-- Access token and refresh token functionality
-- Verification of incoming tokens
-- Return user information based on userId
+1. **User Service**: Handles user registration, authentication, and user profile management
+2. **Order Service**: Manages order creation and listing for authenticated users
 
-### Order Service
-- Token validation via User Service
-- Create orders (title, description, price, optional reference)
-- View user's own orders
-- Stores order data in its own database
+Communication between services is implemented using RabbitMQ message broker, enabling event-driven architecture.
 
-### Frontend
+## Technologies Used
+
+- **NestJS**: Framework for building scalable Node.js applications
+- **TypeScript**: For type-safe code
+- **PostgreSQL**: Database for User Service
+- **Prisma**: ORM for Order Service
+- **RabbitMQ**: Message broker for service communication
+- **JWT**: Authentication mechanism
+- **Docker**: Container platform for development
+
+## Services
+
+### User Service (Port 3001)
+
 - User registration and login
-- JWT authentication with access and refresh tokens
-- Create and view orders
-- Responsive design with Tailwind CSS
+- JWT token generation and validation
+- User profile management
+- Communicates with Order Service via RabbitMQ events
 
-## Technologies
+### Order Service (Port 3002)
 
-- NestJS for backend services
-- React for frontend
-- TypeORM (User Service)
-- Prisma (Order Service)
-- PostgreSQL
-- JWT
-- Tailwind CSS
-- React Query
-- React Router
-- Framer Motion
-
-## Prerequisites
-
-- Node.js (v16 or higher)
-- Docker and Docker Compose
-- npm
+- Create and list orders for authenticated users
+- Uses Prisma ORM for database operations
+- Receives user events from User Service
 
 ## Getting Started
 
-1. Clone the repository
-2. Use the setup script to initialize the development environment:
+### Prerequisites
 
-```bash
-# On Linux/macOS
-chmod +x dev-init.sh
-./dev-init.sh
+- Node.js (v16+)
+- Docker and Docker Compose
+- PostgreSQL
+- RabbitMQ
 
-# On Windows PowerShell
-./dev-init.ps1
-```
+### Installation and Setup
 
-Or manually set up the environment:
+1. **Clone the repository**
 
-3. Start the databases and RabbitMQ with Docker:
+2. **Set up environment variables**
+   - Create `.env` files in each service directory based on the provided templates
 
-```bash
-docker-compose up -d
-```
+3. **Install dependencies**
+   ```bash
+   # In user-service directory
+   cd user-service
+   npm install
 
-4. Install dependencies for all services:
+   # In order-service directory
+   cd ../order-service
+   npm install
+   ```
 
-```bash
-# User Service
-cd user-service
-npm install
+4. **Start services**
+   ```bash
+   # Start User Service
+   cd user-service
+   npm run start:dev
+   
+   # Start Order Service in another terminal
+   cd order-service
+   npm run start:dev
+   ```
 
-# Order Service
-cd ../order-service
-npm install
+5. **Access the services**
+   - User Service: http://localhost:3001
+   - Order Service: http://localhost:3002
 
-# Frontend
-cd ../frontend
-npm install
-```
+## Development
 
-5. Set up the Order Service database with Prisma:
+### Database Migrations
 
+For the Order Service (Prisma):
 ```bash
 cd order-service
-npx prisma generate
 npx prisma migrate dev --name init
 ```
 
-6. Start the services:
+### API Endpoints
 
-```bash
-# User Service
-cd user-service
-npm run start:dev
+#### User Service
+- POST /auth/register - Register a new user
+- POST /auth/login - User login
+- GET /users/profile - Get user profile (authenticated)
 
-# Order Service (in another terminal)
-cd order-service
-npm run start:dev
+#### Order Service
+- POST /orders - Create a new order (authenticated)
+- GET /orders - List all orders for the authenticated user
+- GET /orders/:id - Get a specific order
 
-# Frontend (in another terminal)
-cd frontend
-npm start
-```
+## Deployment
 
-7. Access the application:
-   - Frontend: http://localhost:3000
-   - User Service API: http://localhost:3001
-   - Order Service API: http://localhost:3002
-
-## API Endpoints
-
-### User Service (http://localhost:3001)
-
-- `GET /health` - Health check endpoint
-- `POST /auth/register` - Register a new user
-- `POST /auth/login` - Login and get JWT tokens
-- `POST /auth/refresh` - Refresh access token
-- `POST /auth/logout` - Logout (invalidate refresh token)
-- `GET /users/:id` - Get user by ID (protected)
-
-### Order Service (http://localhost:3002)
-
-- `GET /health` - Health check endpoint
-- `POST /orders` - Create a new order (protected)
-- `GET /orders` - Get all orders of the current user (protected)
-- `GET /orders/:id` - Get a specific order by ID (protected)
-
-## Project Structure
-
-```
-.
-├── docker-compose.yml
-├── user-service/
-│   ├── src/
-│   │   ├── auth/       # Authentication logic
-│   │   ├── users/      # User entity and service
-│   │   ├── dto/        # Data Transfer Objects
-│   │   ├── guards/     # JWT auth guards
-│   │   └── ...
-│   └── ...
-├── order-service/
-│   ├── src/
-│   │   ├── orders/     # Order entity and service
-│   │   ├── dto/        # Data Transfer Objects
-│   │   ├── guards/     # JWT auth guards
-│   │   └── ...
-│   └── ...
-└── frontend/
-    ├── src/
-    │   ├── components/ # React components
-    │   ├── contexts/   # Context providers
-    │   ├── hooks/      # Custom hooks
-    │   ├── pages/      # Page components
-    │   ├── services/   # API services
-    │   ├── types/      # TypeScript interfaces
-    │   └── ...
-    └── ...
-```
-
-## Important Configuration Notes
-
-1. **CORS Configuration**: Both microservices have CORS enabled to allow requests from the frontend. The configuration is in the `main.ts` file of each service.
-
-2. **Order Reference Field**: The Order service includes an optional `orderReference` field which can be set when creating orders.
-
-3. **Authentication Flow**: The frontend uses access and refresh tokens for authentication. Access tokens are short-lived, while refresh tokens allow obtaining new access tokens without requiring the user to log in again.
-
-4. **Environment Variables**: 
-   - User Service: Configure database connection in `.env`
-   - Order Service: Configure database connection and User Service URL in `.env`
-   - Frontend: API URLs are configured in `src/services/api.ts`
-
-## Running Tests
-
-```bash
-# User Service
-cd user-service
-npm run test
-
-# Order Service
-cd order-service
-npm run test
-
-# Frontend
-cd frontend
-npm test
-```
-
-## Troubleshooting
-
-1. **Database Connection Issues**: Ensure PostgreSQL is running in Docker and the connection strings in `.env` files are correct.
-
-2. **CORS Errors**: If you see CORS errors in the browser console, ensure both microservices have proper CORS configuration in `main.ts`.
-
-3. **Prisma Issues**: If you update the Prisma schema, run `npx prisma migrate dev` to apply the changes to the database.
-
-4. **Token Validation Errors**: Ensure User Service is running when using Order Service, as it depends on it for token validation.
-
-5. **Setup Script Issues**: If you encounter issues with the setup scripts, you can follow the manual setup steps in the Getting Started section. 
+For production deployment, consider:
+- Setting up proper environment variables
+- Disabling database synchronize for TypeORM
+- Using production-ready RabbitMQ settings with durable queues
+- Implementing proper logging and monitoring 
