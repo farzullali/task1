@@ -2,25 +2,23 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = require("@nestjs/core");
 const app_module_1 = require("./app.module");
-const validation_pipe_1 = require("./common/pipes/validation.pipe");
+const microservices_1 = require("@nestjs/microservices");
+const common_1 = require("@nestjs/common");
 async function bootstrap() {
-    const app = await core_1.NestFactory.create(app_module_1.AppModule);
-    app.enableCors({
-        origin: ['http://localhost:3000', 'http://localhost:3003'],
-        methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-        credentials: true,
-        allowedHeaders: 'Content-Type,Accept,Authorization',
-    });
-    app.useGlobalPipes(new validation_pipe_1.CustomValidationPipe({
-        transform: true,
-        whitelist: true,
-        forbidNonWhitelisted: true,
-        transformOptions: {
-            enableImplicitConversion: true,
+    const logger = new common_1.Logger('UserService');
+    const app = await core_1.NestFactory.createMicroservice(app_module_1.AppModule, {
+        transport: microservices_1.Transport.RMQ,
+        options: {
+            urls: ['amqp://guest:guest@localhost:5672'],
+            queue: 'user_queue',
+            queueOptions: {
+                durable: false,
+            },
         },
-    }));
-    await app.listen(3001);
-    console.log(`User Service is running on: ${await app.getUrl()}`);
+        logger: ['error', 'warn', 'log', 'debug', 'verbose'],
+    });
+    await app.listen();
+    logger.log('User Microservice is listening');
 }
 bootstrap();
 //# sourceMappingURL=main.js.map

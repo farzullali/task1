@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException, ForbiddenException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, ForbiddenException, Inject, forwardRef } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { LoginDto } from '../dto/login.dto';
@@ -9,11 +9,12 @@ import * as bcrypt from 'bcrypt';
 @Injectable()
 export class AuthService {
   constructor(
+    @Inject(forwardRef(() => UsersService))
     private usersService: UsersService,
     private tokensService: TokensService,
   ) {}
 
-  async register(createUserDto: CreateUserDto): Promise<Tokens> {
+  async register(createUserDto: CreateUserDto): Promise<{ tokens: Tokens; user: Partial<User> }> {
     const existingUser = await this.usersService.findByEmail(createUserDto.email);
     if (existingUser) {
       throw new UnauthorizedException('Email already exists');
@@ -23,7 +24,15 @@ export class AuthService {
     const tokens = await this.getTokens(newUser);
     await this.updateRefreshToken(newUser.id, tokens.refresh_token);
     
-    return tokens;
+    return {
+      tokens,
+      user: {
+        id: newUser.id,
+        email: newUser.email,
+        firstName: newUser.firstName,
+        lastName: newUser.lastName,
+      },
+    };
   }
 
   async login(loginDto: LoginDto): Promise<{ tokens: Tokens; user: Partial<User> }> {

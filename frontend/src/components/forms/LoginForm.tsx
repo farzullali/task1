@@ -37,14 +37,23 @@ const LoginForm: React.FC = () => {
     
     try {
       const response = await loginUser(data);
-      setUser(response.user);
-      navigate('/orders');
-    } catch (error) {
-      if (error instanceof Error) {
-        setError(error.message);
+      if (response && response.user) {
+        setUser(response.user);
+        navigate('/orders');
       } else {
-        setError('An error occurred during login.');
+        setError('Invalid response from server');
       }
+    } catch (error: any) {
+      console.error('Login error in component:', error);
+      let errorMessage = 'An error occurred during login.';
+      
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (error?.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      }
+      
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -68,7 +77,7 @@ const LoginForm: React.FC = () => {
         </div>
       )}
 
-      <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
+      <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)} noValidate>
         <div className="space-y-4">
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700">

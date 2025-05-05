@@ -7,7 +7,10 @@ import { User } from '../users/entities/user.entity';
 export declare class AuthController {
     private authService;
     constructor(authService: AuthService);
-    register(createUserDto: CreateUserDto): Promise<Tokens>;
+    register(createUserDto: CreateUserDto): Promise<{
+        tokens: Tokens;
+        user: Partial<User>;
+    }>;
     login(loginDto: LoginDto): Promise<{
         tokens: Tokens;
         user: Partial<User>;

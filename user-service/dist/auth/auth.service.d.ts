@@ -7,7 +7,10 @@ export declare class AuthService {
     private usersService;
     private tokensService;
     constructor(usersService: UsersService, tokensService: TokensService);
-    register(createUserDto: CreateUserDto): Promise<Tokens>;
+    register(createUserDto: CreateUserDto): Promise<{
+        tokens: Tokens;
+        user: Partial<User>;
+    }>;
     login(loginDto: LoginDto): Promise<{
         tokens: Tokens;
         user: Partial<User>;

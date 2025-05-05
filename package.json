@@ -1,0 +1,24 @@
+{
+  "name": "microservices-project",
+  "version": "1.0.0",
+  "description": "Message-based microservices architecture with RabbitMQ",
+  "scripts": {
+    "start:user": "cd user-service && npm run start:dev",
+    "start:order": "cd order-service && npm run start:dev",
+    "start:gateway": "cd api-gateway && npm run start:dev",
+    "start:frontend": "cd frontend && npm start",
+    "start:dev": "concurrently \"npm run start:user\" \"npm run start:order\" \"npm run start:gateway\" \"npm run start:frontend\"",
+    "restart:infra": "docker-compose down && docker-compose up -d",
+    "install:all": "npm install && cd user-service && npm install && cd ../order-service && npm install && cd ../api-gateway && npm install --legacy-peer-deps && cd ../frontend && npm install"
+  },
+  "keywords": [
+    "microservices",
+    "rabbitmq",
+    "nestjs"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+} 

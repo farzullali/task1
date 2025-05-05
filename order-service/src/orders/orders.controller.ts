@@ -1,31 +1,26 @@
-import { Controller, Get, Post, Body, Param, UseGuards, Req } from '@nestjs/common';
+import { Controller } from '@nestjs/common';
+import { MessagePattern, Payload } from '@nestjs/microservices';
 import { OrdersService } from './orders.service';
-import { CreateOrderDto } from '../dto/create-order.dto';
-import { JwtAuthGuard } from '../guards/jwt-auth.guard';
-import { Order } from '@prisma/client';
 
-@Controller('orders')
+@Controller()
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
-  @UseGuards(JwtAuthGuard)
-  @Post()
-  create(@Body() createOrderDto: CreateOrderDto, @Req() req: any): Promise<Order> {
-    const userId = req.user.sub;
-    return this.ordersService.create(createOrderDto, userId);
+  @MessagePattern('create_order')
+  async create(@Payload() data: any) {
+    const { userId, order } = data;
+    return this.ordersService.create(order, userId);
   }
 
-  @UseGuards(JwtAuthGuard)
-  @Get()
-  findAll(@Req() req: any): Promise<Order[]> {
-    const userId = req.user.sub;
+  @MessagePattern('get_user_orders')
+  async findAll(@Payload() data: any) {
+    const { userId } = data;
     return this.ordersService.findAllByUser(userId);
   }
 
-  @UseGuards(JwtAuthGuard)
-  @Get(':id')
-  findOne(@Param('id') id: string, @Req() req: any): Promise<Order> {
-    const userId = req.user.sub;
+  @MessagePattern('get_order')
+  async findOne(@Payload() data: any) {
+    const { id, userId } = data;
     return this.ordersService.findOne(id, userId);
   }
 } 

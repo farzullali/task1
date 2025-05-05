@@ -14,27 +14,70 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UsersController = void 0;
 const common_1 = require("@nestjs/common");
+const microservices_1 = require("@nestjs/microservices");
 const users_service_1 = require("./users.service");
-const jwt_auth_guard_1 = require("../guards/jwt-auth.guard");
+const auth_service_1 = require("../auth/auth.service");
 let UsersController = class UsersController {
-    constructor(usersService) {
+    constructor(usersService, authService) {
         this.usersService = usersService;
+        this.authService = authService;
     }
-    findOne(id) {
-        return this.usersService.findOne(id);
+    async register(user) {
+        return this.authService.register(user);
+    }
+    async login(credentials) {
+        return this.authService.login(credentials);
+    }
+    async getProfile(data) {
+        return this.usersService.findOne(data.id);
+    }
+    async getUser(data) {
+        return this.usersService.findOne(data.id);
+    }
+    async validateToken(data) {
+        const { token } = data;
+        return this.authService.validateAccessToken(token);
     }
 };
 exports.UsersController = UsersController;
 __decorate([
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    (0, common_1.Get)(':id'),
-    __param(0, (0, common_1.Param)('id')),
+    (0, microservices_1.MessagePattern)('register_user'),
+    __param(0, (0, microservices_1.Payload)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
-], UsersController.prototype, "findOne", null);
+], UsersController.prototype, "register", null);
+__decorate([
+    (0, microservices_1.MessagePattern)('login_user'),
+    __param(0, (0, microservices_1.Payload)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "login", null);
+__decorate([
+    (0, microservices_1.MessagePattern)('get_user_profile'),
+    __param(0, (0, microservices_1.Payload)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "getProfile", null);
+__decorate([
+    (0, microservices_1.MessagePattern)('get_user'),
+    __param(0, (0, microservices_1.Payload)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "getUser", null);
+__decorate([
+    (0, microservices_1.MessagePattern)('validate_token'),
+    __param(0, (0, microservices_1.Payload)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "validateToken", null);
 exports.UsersController = UsersController = __decorate([
-    (0, common_1.Controller)('users'),
-    __metadata("design:paramtypes", [users_service_1.UsersService])
+    (0, common_1.Controller)(),
+    __metadata("design:paramtypes", [users_service_1.UsersService,
+        auth_service_1.AuthService])
 ], UsersController);
 //# sourceMappingURL=users.controller.js.map

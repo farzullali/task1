@@ -56,12 +56,17 @@ const RegisterForm: React.FC = () => {
     try {
       await registerUser(data);
       navigate('/login', { state: { success: 'Registration successful! Please log in.' } });
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Registration error in component:', error);
+      let errorMessage = 'An error occurred during registration.';
+      
       if (error instanceof Error) {
-        setError(error.message);
-      } else {
-        setError('An error occurred during registration.');
+        errorMessage = error.message;
+      } else if (error?.response?.data?.message) {
+        errorMessage = error.response.data.message;
       }
+      
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -85,7 +90,7 @@ const RegisterForm: React.FC = () => {
         </div>
       )}
 
-      <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
+      <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)} noValidate>
         <div className="space-y-4">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>

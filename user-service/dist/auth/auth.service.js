@@ -8,6 +8,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthService = void 0;
 const common_1 = require("@nestjs/common");
@@ -27,7 +30,15 @@ let AuthService = class AuthService {
         const newUser = await this.usersService.create(createUserDto);
         const tokens = await this.getTokens(newUser);
         await this.updateRefreshToken(newUser.id, tokens.refresh_token);
-        return tokens;
+        return {
+            tokens,
+            user: {
+                id: newUser.id,
+                email: newUser.email,
+                firstName: newUser.firstName,
+                lastName: newUser.lastName,
+            },
+        };
     }
     async login(loginDto) {
         const user = await this.validateUser(loginDto.email, loginDto.password);
@@ -93,6 +104,7 @@ let AuthService = class AuthService {
 exports.AuthService = AuthService;
 exports.AuthService = AuthService = __decorate([
     (0, common_1.Injectable)(),
+    __param(0, (0, common_1.Inject)((0, common_1.forwardRef)(() => users_service_1.UsersService))),
     __metadata("design:paramtypes", [users_service_1.UsersService,
         tokens_service_1.TokensService])
 ], AuthService);

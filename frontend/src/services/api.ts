@@ -1,26 +1,21 @@
 import axios, { AxiosError, InternalAxiosRequestConfig, AxiosResponse } from 'axios';
 import { AuthTokens, RefreshTokenRequest } from '../types/auth';
 
-// API URLs
-const USER_SERVICE_URL = 'http://localhost:3001';
-const ORDER_SERVICE_URL = 'http://localhost:3002';
+// API URLs - Point everything to the API Gateway
+const API_GATEWAY_URL = 'http://localhost:3003';
 
-// Create axios instances for each service
-export const userApi = axios.create({
-  baseURL: USER_SERVICE_URL,
+// Create axios instance for the API Gateway
+export const api = axios.create({
+  baseURL: API_GATEWAY_URL,
   headers: {
     'Content-Type': 'application/json',
   },
   withCredentials: true,
 });
 
-export const orderApi = axios.create({
-  baseURL: ORDER_SERVICE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  withCredentials: true,
-});
+// For backward compatibility with existing code
+export const userApi = api;
+export const orderApi = api;
 
 // Token storage in localStorage
 const getAccessToken = (): string | null => localStorage.getItem('access_token');
@@ -55,7 +50,7 @@ const refreshTokens = async (): Promise<AuthTokens> => {
   
   try {
     const response = await axios.post<AuthTokens>(
-      `${USER_SERVICE_URL}/auth/refresh`,
+      `${API_GATEWAY_URL}/users/refresh`,
       refreshRequest,
       {
         withCredentials: true,
@@ -101,8 +96,8 @@ const setupInterceptors = (api: typeof userApi) => {
           
           return api(originalRequest);
         } catch (refreshError) {
-          // If refresh token fails, redirect to login
-          window.location.href = '/login';
+          // Don't redirect automatically, let the component handle it
+          console.error('Token refresh failed:', refreshError);
           return Promise.reject(refreshError);
         }
       }
@@ -112,8 +107,7 @@ const setupInterceptors = (api: typeof userApi) => {
   );
 };
 
-// Setup interceptors for both APIs
-setupInterceptors(userApi);
-setupInterceptors(orderApi);
+// Setup interceptors for the API
+setupInterceptors(api);
 
 export { storeTokens, clearTokens, getUserId }; 

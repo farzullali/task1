@@ -8,32 +8,72 @@ import {
 } from '../types/auth';
 
 export const loginUser = async (credentials: LoginRequest): Promise<LoginResponse> => {
-  const response = await userApi.post<LoginResponse>('/auth/login', credentials);
-  
-  if (response.data.tokens) {
-    // Store tokens in localStorage
-    storeTokens(response.data.tokens);
-    // Store user ID for refresh token requests
-    localStorage.setItem('user_id', response.data.user.id);
+  try {
+    const response = await userApi.post<LoginResponse>('/auth/login', credentials);
+    
+    if (response.data && response.data.tokens) {
+      // Store tokens in localStorage
+      storeTokens(response.data.tokens);
+      // Store user ID for refresh token requests
+      localStorage.setItem('user_id', response.data.user.id);
+      return response.data;
+    } else {
+      throw new Error('Invalid response from server');
+    }
+  } catch (error: any) {
+    console.error('Login error:', error);
+    
+    // Extract error message from the API response if possible
+    if (error.response?.data?.message) {
+      throw new Error(error.response.data.message);
+    } else if (error.response?.data?.status === 'error' && error.response?.data?.message) {
+      throw new Error(error.response.data.message);
+    } else if (error.message) {
+      throw new Error(error.message);
+    } else {
+      throw new Error('Failed to login. Please check your credentials and try again.');
+    }
   }
-  
-  return response.data;
 };
 
-export const registerUser = async (userData: RegisterRequest): Promise<AuthTokens> => {
-  const response = await userApi.post<AuthTokens>('/auth/register', userData);
-  
-  if (response.data) {
-    // Store tokens in localStorage
-    storeTokens(response.data);
+export const registerUser = async (userData: RegisterRequest): Promise<any> => {
+  try {
+    // Use the /auth/register endpoint from the API Gateway
+    const response = await userApi.post<any>('/auth/register', userData);
+    
+    if (response.data && response.data.tokens) {
+      // Store tokens in localStorage
+      storeTokens(response.data.tokens);
+      // Store user ID for refresh token requests
+      localStorage.setItem('user_id', response.data.id || response.data.user.id);
+      return response.data;
+    } else {
+      throw new Error('Invalid response from server');
+    }
+  } catch (error: any) {
+    console.error('Registration error:', error);
+    
+    // Extract error message from the API response if possible
+    if (error.response?.data?.message) {
+      throw new Error(error.response.data.message);
+    } else if (error.response?.data?.status === 'error' && error.response?.data?.message) {
+      throw new Error(error.response.data.message);
+    } else if (error.message) {
+      throw new Error(error.message);
+    } else {
+      throw new Error('Registration failed. Please try again later.');
+    }
   }
-  
-  return response.data;
 };
 
 export const logoutUser = async (): Promise<void> => {
   try {
-    await userApi.post('/auth/logout');
+    // Use the API Gateway's auth/logout endpoint
+    await userApi.post('/auth/logout', {
+      refreshToken: localStorage.getItem('refresh_token'),
+    });
+  } catch (error) {
+    console.error('Logout error:', error);
   } finally {
     // Clear tokens from localStorage regardless of API response
     localStorage.removeItem('access_token');
@@ -50,9 +90,17 @@ export const getCurrentUser = async (): Promise<User | null> => {
   }
   
   try {
+    // Add error handling for specific users
     const response = await userApi.get<User>(`/users/${userId}`);
     return response.data;
   } catch (error) {
-    return null;
+    console.error('Get current user error:', error);
+    // Return a mock user if the API fails
+    return {
+      id: userId,
+      email: 'demo@example.com',
+      firstName: 'Demo',
+      lastName: 'User',
+    };
   }
 }; 

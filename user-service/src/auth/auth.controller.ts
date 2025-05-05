@@ -15,7 +15,7 @@ export class AuthController {
 
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
-  async register(@Body() createUserDto: CreateUserDto): Promise<Tokens> {
+  async register(@Body() createUserDto: CreateUserDto): Promise<{ tokens: Tokens; user: Partial<User> }> {
     return this.authService.register(createUserDto);
   }
 

@@ -14,55 +14,49 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.OrdersController = void 0;
 const common_1 = require("@nestjs/common");
+const microservices_1 = require("@nestjs/microservices");
 const orders_service_1 = require("./orders.service");
-const create_order_dto_1 = require("../dto/create-order.dto");
-const jwt_auth_guard_1 = require("../guards/jwt-auth.guard");
 let OrdersController = class OrdersController {
     constructor(ordersService) {
         this.ordersService = ordersService;
     }
-    create(createOrderDto, req) {
-        const userId = req.user.sub;
-        return this.ordersService.create(createOrderDto, userId);
+    async create(data) {
+        const { userId, order } = data;
+        return this.ordersService.create(order, userId);
     }
-    findAll(req) {
-        const userId = req.user.sub;
+    async findAll(data) {
+        const { userId } = data;
         return this.ordersService.findAllByUser(userId);
     }
-    findOne(id, req) {
-        const userId = req.user.sub;
+    async findOne(data) {
+        const { id, userId } = data;
         return this.ordersService.findOne(id, userId);
     }
 };
 exports.OrdersController = OrdersController;
 __decorate([
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    (0, common_1.Post)(),
-    __param(0, (0, common_1.Body)()),
-    __param(1, (0, common_1.Req)()),
+    (0, microservices_1.MessagePattern)('create_order'),
+    __param(0, (0, microservices_1.Payload)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [create_order_dto_1.CreateOrderDto, Object]),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], OrdersController.prototype, "create", null);
 __decorate([
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    (0, common_1.Get)(),
-    __param(0, (0, common_1.Req)()),
+    (0, microservices_1.MessagePattern)('get_user_orders'),
+    __param(0, (0, microservices_1.Payload)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], OrdersController.prototype, "findAll", null);
 __decorate([
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    (0, common_1.Get)(':id'),
-    __param(0, (0, common_1.Param)('id')),
-    __param(1, (0, common_1.Req)()),
+    (0, microservices_1.MessagePattern)('get_order'),
+    __param(0, (0, microservices_1.Payload)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], OrdersController.prototype, "findOne", null);
 exports.OrdersController = OrdersController = __decorate([
-    (0, common_1.Controller)('orders'),
+    (0, common_1.Controller)(),
     __metadata("design:paramtypes", [orders_service_1.OrdersService])
 ], OrdersController);
 //# sourceMappingURL=orders.controller.js.map
