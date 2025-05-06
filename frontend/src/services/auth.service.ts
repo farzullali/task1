@@ -1,4 +1,4 @@
-import { userApi, storeTokens } from './api';
+import { userApi, storeTokens, clearTokens } from './api';
 import { 
   LoginRequest, 
   LoginResponse, 
@@ -79,6 +79,7 @@ export const logoutUser = async (): Promise<void> => {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
     localStorage.removeItem('user_id');
+    clearTokens();
   }
 };
 

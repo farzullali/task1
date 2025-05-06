@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { 
   useQuery, 
   useMutation, 
@@ -6,6 +6,7 @@ import {
 } from '@tanstack/react-query';
 import { getOrders, getOrderById, createOrder } from '../services/order.service';
 import { Order, CreateOrderRequest } from '../types/order';
+import { useAuth } from '../contexts/AuthContext';
 
 // Custom hook for fetching a single order
 export const useOrder = (id: string) => {
@@ -25,6 +26,7 @@ export const useOrder = (id: string) => {
 export const useOrders = () => {
   const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
+  const { user } = useAuth();
 
   // Get all orders
   const { 
@@ -32,15 +34,24 @@ export const useOrders = () => {
     isLoading: isLoadingOrders,
     refetch: refetchOrders
   } = useQuery({
-    queryKey: ['orders'],
+    queryKey: ['orders', user?.id],
     queryFn: getOrders,
+    enabled: !!user, // Only run query if user is authenticated
   });
+
+  // Effect to clear orders cache when user changes
+  useEffect(() => {
+    return () => {
+      // This cleanup function will run when the component unmounts or user changes
+      queryClient.removeQueries({ queryKey: ['orders'] });
+    };
+  }, [user?.id, queryClient]);
 
   // Create new order
   const createOrderMutation = useMutation({
     mutationFn: (orderData: CreateOrderRequest) => createOrder(orderData),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['orders'] });
+      queryClient.invalidateQueries({ queryKey: ['orders', user?.id] });
     },
   });
 
