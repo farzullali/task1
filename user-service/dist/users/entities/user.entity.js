@@ -11,7 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.User = void 0;
 const typeorm_1 = require("typeorm");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 let User = class User {
     async hashPassword() {
         this.password = await bcrypt.hash(this.password, 10);
